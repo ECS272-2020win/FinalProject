@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ECS 272 Final Project</title>
+    <script src="lib/d3.v4.js"></script>
+    <script src="lib/jquery-2.1.3.min.js"></script>
+    <script src="lib/numeric-1.2.6.min.js"></script>
+    <script src="lib/bootstrap.min.js"></script>
+    <script src="js/buildAxis.js"></script>
+    <script src="js/buildScatterplot.js"></script>
+    <script src="js/load.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+</head>
+<body onload="loadData()">
+    <div id="controlPanel" style="width: 80%; float: left;">
+        <div id="axisControl">
+            <div id="xc">
+                <select id="x-select" onchange="updateSelction(0, value)" style="position: absolute; left: 30px; top: 595px"></select>
+                <button id="x-save" style="position: absolute; left: 205px; top: 595px">Save X</button>
+                <button id="x-clear" style="position: absolute; left: 260px; top: 595px">Clear X</button>
+            </div>
+            <div id="yc">
+                <select id="y-select" onchange="updateSelction(1, value)" style="position: absolute; left: 30px; top: 555px"></select>
+                <button id="y-save" style="position: absolute; left: 205px; top: 555px">Save Y</button>
+                <button id="y-clear" style="position: absolute; left: 260px; top: 555px">Clear Y</button>
+            </div>
+        </div>
+    </div>
+    <div id="dataPanel" class="table" style="width: 20%; float: left;"></div>
+</body>
+</html>
