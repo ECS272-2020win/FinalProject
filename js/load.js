@@ -16,6 +16,8 @@ var canvasHeight = 780;
 var xWeights = [];
 var yWeights = [];
 
+var referenceData=[];
+
 function loadData() {
     for(var i = 0; i < featLength; i++) {
         rawData[features[i]] = [];
@@ -42,6 +44,12 @@ function loadData() {
     //load data
     d3.csv("dataset/04cars data_clean.csv", function(data) {
         totalNumber = data.length;
+        //get num of rows
+        console.log(totalNumber)
+        for(var i = 0; i< data.length; i++){
+            var object = {dindex: i, ditemName: data[i]["Vehicle Name"]};
+            referenceData.push(object);
+        }
         for(var i = 0; i < data.length; i++) {
             coordinates.push(new Array());
             for(var j = 0; j < featLength; j++) {
@@ -65,10 +73,16 @@ function loadData() {
         }
 
         draw();
+        //init table with index of the items
+        // for(var i = 0; i<300; i++){
+        //     console.log(rawData[features[0]][i]);
+        // }
+        buildTable(-1);
+        // console.log(features[0])
+        // console.log(rawData[features[0]][1])
     })
 
-    //init table
-    buildTable(-1);
+
 }
 
 function draw() {
@@ -140,7 +154,8 @@ ScatterPlot = function (dataToDraw, conf) {
 
     var data = [];
     for(var i = 0; i < dataToDraw.coordsX.length; i++) {
-        var obj = {dx: dataToDraw.coordsX[i], dy: dataToDraw.coordsY[i]};
+        var obj = {dx: dataToDraw.coordsX[i], dy: dataToDraw.coordsY[i], dindex: referenceData[i].dindex,
+                                                                             ditemNam: referenceData[i].ditemName};
         data.push(obj);
     }
 
@@ -153,6 +168,11 @@ ScatterPlot = function (dataToDraw, conf) {
         .attr("cy", function (d) { return self.y(d.dy); } )
         .attr("r", 5.0)
         .style("cursor", "resize")
+        .on("mouseover", function(d) {
+            console.log(d.dindex);
+            buildTable(d.dindex);
+            d3.selectAll("circle").filter(function(c) {return c==d;});
+        })
 
     //dropzones
     this.dropzoneView = this.svg.append("g")
@@ -231,6 +251,7 @@ ScatterPlot = function (dataToDraw, conf) {
 
 }
 
+
 ScatterPlot.prototype.redraw = function () {
 
 }
@@ -239,6 +260,7 @@ ScatterPlot.prototype.redraw = function () {
 function buildTable(index) {
     d3.select("#dataPanel").selectAll("table").remove();
     var vname = (index === -1) ? "Vehicle Name" : rawData[features[0]][index];
+    //console.log(rawData[features[0]][index])
 
     var table = d3.select("#dataPanel").append("table")
         .attr("style", "margin-left: 5px; margin-top: 20px;");
