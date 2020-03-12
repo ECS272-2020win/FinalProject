@@ -16,6 +16,14 @@ var canvasHeight = 780;
 var xWeights = [];
 var yWeights = [];
 
+//store the points in dropzone
+var HighY=[];
+var HighX=[];
+var LowY=[];
+var LowX=[];
+var Tx=[];
+var Ty=[];
+
 var referenceData=[];
 
 function loadData() {
@@ -88,8 +96,8 @@ function loadData() {
 function draw() {
     var cdx = [], cdy = [];
     for(var i = 0; i < totalNumber; i++) {
-        cdx.push(coordinates[i][currentXAxis]);
-        cdy.push(coordinates[i][currentYAxis]);
+        cdx.push(coordinates[i][currentXAxis-1]);//加了个-1，因为这个没有第一列的车名，所以要往前数一个
+        cdy.push(coordinates[i][currentYAxis-1]);
     }
     var dataToDraw = {featureX: features[currentXAxis], coordsX: cdx,
                       featureY: features[currentYAxis], coordsY: cdy};
@@ -168,6 +176,7 @@ ScatterPlot = function (dataToDraw, conf) {
         .attr("cy", function (d) { return self.y(d.dy); } )
         .attr("r", 5.0)
         .style("cursor", "resize")
+        .call(drag_point)
         .on("mouseover", function(d) {
             console.log(d.dindex);
             buildTable(d.dindex);
@@ -176,6 +185,7 @@ ScatterPlot = function (dataToDraw, conf) {
         .on("mouseout", function(d){
             d3.select(this).style("fill-opacity",0.2)
         })
+
 
     //dropzones
     this.dropzoneView = this.svg.append("g")
