@@ -171,7 +171,10 @@ ScatterPlot = function (dataToDraw, conf) {
         .on("mouseover", function(d) {
             console.log(d.dindex);
             buildTable(d.dindex);
-            d3.selectAll("circle").filter(function(c) {return c==d;});
+            d3.select(this).style("fill-opacity", 1);
+        })
+        .on("mouseout", function(d){
+            d3.select(this).style("fill-opacity",0.2)
         })
 
     //dropzones
@@ -205,7 +208,16 @@ ScatterPlot = function (dataToDraw, conf) {
         .attr("width", dropSize)
         .attr("height", dropSize)
         .attr("rx", dropRad)
-        .attr("ry", dropRad);
+        .attr("ry", dropRad)
+        .on("mouseover", function(d) {
+            d3.select(this).style("stroke", "black")
+                           .style("stroke-width", 2 )
+                           .style("opacity", 0.5);
+        })
+        .on("mouseout", function(d){
+            d3.select(this).style("stroke",null)
+                           .style("opacity",1)
+        })
 
     //y axis
     this.yAxisView = this.svg.append("g")
