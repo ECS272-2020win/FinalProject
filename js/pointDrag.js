@@ -7,8 +7,8 @@ function dragstarted(d) {
     document.onselectstart = function() { return false; };
     d3.select(this).attr("stroke", "black");
     if(d.oldy==null&&d.oldx==null) {
-        d.oldx=d3.event.x;
-        d.oldy=d3.event.y;
+        d.oldx=this.getAttribute("cx")
+        d.oldy=this.getAttribute("cy")
     }
 }
 
@@ -21,21 +21,25 @@ function dragended(d) {
     if(d.x<=-40&&d.x>=-120&&d.y>=0&&d.y<=80)
     {
         d.in_dropzone="HighY";
+        coordinates[d.dindex][featLength-1]="HighY"
         HighY.push(d);
     }
     else if(d.x<=-40&&d.x>=-120&&d.y>=440&&d.y<=520)
     {
         d.in_dropzone="LowY";
+        coordinates[d.dindex][featLength-1]="LowY"
         LowY.push(d);
     }
     else if(d.x<=80&&d.x>=0&&d.y>=540&&d.y<=620)
     {
         d.in_dropzone="LowX";
+        coordinates[d.dindex][featLength-1]="LowX"
         LowX.push(d);
     }
     else if(d.x<=800&&d.x>=720&&d.y>=540&&d.y<=620)
     {
         d.in_dropzone="HighX";
+        coordinates[d.dindex][featLength-1]="HighX"
         HighX.push(d);
     }
     else
@@ -46,14 +50,17 @@ function dragended(d) {
     if(d.in_dropzone===null)
     {
         d3.select(this).attr("stroke", null)
-            .attr("transform","translate("+(d.oldx-d.x)+","+(d.oldy-d.y)+")")
+            .attr("cx",d.oldx)
+            .attr("cy",d.oldy)
     }
     else
     {
         d3.select(this).attr("stroke", null)
-            .attr("transform","translate("+(d.oldx-d.x)+","+(d.oldy-d.y)+")")
+            .attr("cx",d.oldx)
+            .attr("cy",d.oldy)
             .style("fill", "#23ee85");
         calculateDropzone();
+        updateBarchart();
     }
 }
 

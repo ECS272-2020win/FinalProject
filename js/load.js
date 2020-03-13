@@ -21,8 +21,8 @@ var HighY=[];
 var HighX=[];
 var LowY=[];
 var LowX=[];
-var Tx=[];
-var Ty=[];
+var Tx=new Array(featLength-1).fill(0)
+var Ty=new Array(featLength-1).fill(0)
 
 var referenceData=[];
 
@@ -101,6 +101,10 @@ function draw() {
     }
     var dataToDraw = {featureX: features[currentXAxis], coordsX: cdx,
                       featureY: features[currentYAxis], coordsY: cdy};
+
+    Ty[currentYAxis-1]=1;
+    Tx[currentXAxis-1]=1;
+
     var conf = {};
 
     d3.selectAll("svg").remove();
@@ -229,54 +233,83 @@ ScatterPlot = function (dataToDraw, conf) {
                            .style("opacity",1)
         })
 
+    var showX;
+    var showY;
+    showX=sortAbs(Tx);
+    showY=sortAbs(Ty);
+
+    var showFeatureX=showX.slice(0,13)
+    var showFeatureY=showY.slice(0,13)
+
     //y axis
     this.yAxisView = this.svg.append("g")
         .attr("id", "y-axis")
         .attr("transform", "translate(30,"+110+")");
-
-    const yScale_y = d3.scaleLinear()
+    xScale_y = d3.scaleLinear()
         .range([this.margin.left - 120, 0])
-        .domain([1, 0]);
+        .domain([Math.max.apply(null,Ty),Math.min.apply(null,Ty)]);
     this.yAxisView.append("g")
         .attr("transform", "translate(45,20)")
-        .call(d3.axisTop(yScale_y));
+        .call(d3.axisTop(xScale_y));
 
-    const xScale_y = d3.scaleBand()
+    yScale_y = d3.scaleBand()
         .range([0, this.height-dropSize*2-20])
-        .domain(features.slice(5))
+        .domain(showFeatureY.map(function(d) {return d["attr"]}))
         .padding(0.04)
     this.yAxisView.append("g")
         .attr("transform", "translate(45,20)")
-        .call(d3.axisLeft(xScale_y));
+        .call(d3.axisLeft(yScale_y));
+
+    var dragBar = this.yAxisView
+        .selectAll(".bar")
+        .data(showFeatureY)
+        .enter().append("rect")
+        .style("fill",function(d) { return d["value"] < 0 ? "brown":"steelblue"})
+        .attr("x", function(d) { return xScale_y(Math.min(0, d["value"]))+45; })
+        .attr("y", function(d) { return yScale_y(d["attr"])+28; })
+        .attr("width", function(d) { if (d["value"]==0) {return 2;} else {return Math.abs(xScale_y(d["value"]) - xScale_y(0));} })
+        .attr("height", 10)
+        .attr("fill-opacity", 0.8);
 
     //x axis
-    var xavLeft = this.margin.left+dropSize+10,
-        xavTop = canvasHeight-this.margin.bottom+dropSize*0.25;
+    // var xavLeft = this.margin.left+dropSize+10,
+    //     xavTop = canvasHeight-this.margin.bottom+dropSize*0.25;
     this.xAxisView = this.svg.append("g")
         .attr("id", "x-axis")
-        .attr("transform", "translate("+xavLeft+","+xavTop+")");
+        .attr("transform", "translate(490,"+560+")");
 
-    const yScale_x = d3.scaleLinear()
+    const xScale_x = d3.scaleLinear()
         .range([this.width-dropSize*2-120, 0])
-        .domain([1, 0]);
-    this.yAxisView.append("g")
-        .attr("transform", "translate("+(xavLeft+50)+","+(xavTop-100)+")")
-        .call(d3.axisTop(yScale_x));
+        .domain([Math.max.apply(null,Tx),Math.min.apply(null,Tx)]);
+    this.xAxisView.append("g")
+        .attr("transform", "translate(60,20)")
+        .call(d3.axisTop(xScale_x));
 
-    const xScale_x = d3.scaleBand()
-        .range([0, this.margin.bottom-20])
-        .domain(features.slice(6))
+    const yScale_x = d3.scaleBand()
+        .range([0, this.margin.bottom-40])
+        .domain(showFeatureX.map(function(d) {return d["attr"]}))
         .padding(0.015)
-    this.yAxisView.append("g")
-        .attr("transform", "translate("+(xavLeft+50)+","+(xavTop-100)+")")
-        .call(d3.axisLeft(xScale_x));
+    this.xAxisView.append("g")
+        .attr("transform", "translate(60,20)")
+        .call(d3.axisLeft(yScale_x));
+
+    var dragBar = this.xAxisView
+        .selectAll(".bar")
+        .data(showFeatureX)
+        .enter().append("rect")
+        .style("fill",function(d) { return d["value"] < 0 ? "brown":"steelblue"})
+        .attr("x", function(d) { return xScale_x(Math.min(0, d["value"]))+60; })
+        .attr("y", function(d) { return yScale_x(d["attr"])+22; })
+        .attr("width", function(d) { if (d["value"]==0) {return 2;} else {return Math.abs(xScale_x(d["value"]) - xScale_x(0));} })
+        .attr("height", 10)
+        .attr("fill-opacity", 0.8);
 
 }
 
 
-ScatterPlot.prototype.redraw = function () {
-
-}
+// ScatterPlot.prototype.redraw = function () {
+//
+// }
 
 
 function buildTable(index) {
@@ -319,3 +352,4 @@ function buildTable(index) {
         .append("td")
         .html(function(d) { return d.value; });
 }
+
