@@ -73,6 +73,7 @@ function loadData() {
 }
 
 function loadDataset(datasetUrl) {
+    coordinates = [];
     referenceData = [];
     rawData = {};
     for(var i = 0; i < featLength; i++) {
