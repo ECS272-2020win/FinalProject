@@ -64,121 +64,9 @@ function sortAbs(T) {
     return X;
 }
 
-function updateBarchart() {
-    if(HighY.length>=1&&LowY.length>=1) {
-
-        var showY
-        showY = sortAbs(Ty).slice(0, 14);
-
-        xScale_y = d3.scaleLinear()
-            .range([this.margin.left - 120, 0])
-            .domain([Math.max.apply(null,Ty),Math.min.apply(null,Ty)]).nice();
-
-        yScale_y = d3.scaleBand()
-            .range([0, this.height-dropSize*2-20])
-            .domain(showY.map(function(d) {return d["attr"]}))
-            .padding(0.04)
-
-
-        this.yAxisView.selectAll("rect").remove();
-        this.yAxisView.selectAll("g").remove();
-
-        this.yAxisView.append("g")
-            .attr("transform", "translate(45,20)")
-            .call(d3.axisTop(xScale_y));
-        this.yAxisView.append("g")
-            .attr("transform", "translate(45,20)")
-            .call(d3.axisLeft(yScale_y));
-        this.yAxisView.append("g")
-            .append("line")
-            .attr("x1",xScale_y(0)+45)
-            .attr("x2",xScale_y(0)+45)
-            .attr("y1",20)
-            .attr("y2",360)
-            .attr("stroke","#000")
-
-        var dragBarY = this.yAxisView
-            .selectAll(".bar")
-            .data(showY)
-            .enter().append("rect")
-            .style("fill",function(d) { return d["value"] < 0 ? "brown":"steelblue"})
-            .attr("x", function (d) {
-                return xScale_y(Math.min(0, d["value"]))+45 ;
-            })
-            .attr("y", function (d) {
-                return yScale_y(d["attr"])+28 ;
-            })
-            .attr("width", function (d) {
-                if (d["value"] == 0) {
-                    return 2;
-                } else {
-                    return Math.abs(xScale_y(d["value"]) - xScale_y(0));
-                }
-            })
-            .attr("height", 10)
-            .attr("fill-opacity", 0.8);
-    }
-
-    if(HighX.length>=1&&LowX.length>=1) {
-        var showX
-        showX = sortAbs(Tx).slice(0, 14);
-
-        xScale_x = d3.scaleLinear()
-            .range([this.width-dropSize*2-120, 0])
-            .domain([Math.max.apply(null,Tx),Math.min.apply(null,Tx)]);
-
-        yScale_x = d3.scaleBand()
-            .range([0, this.margin.bottom-40])
-            .domain(showX.map(function(d) {return d["attr"]}))
-            .padding(0.015)
-
-
-        this.xAxisView.selectAll("rect").remove();
-        this.xAxisView.selectAll("g").remove();
-
-        this.xAxisView.append("g")
-            .attr("transform", "translate(60,20)")
-            .call(d3.axisTop(xScale_x));
-        this.xAxisView.append("g")
-            .attr("transform", "translate(60,20)")
-            .call(d3.axisLeft(yScale_x));
-        this.xAxisView.append("g")
-            .append("line")
-            .attr("x1",xScale_x(0)+60)
-            .attr("x2",xScale_x(0)+60)
-            .attr("y1",20)
-            .attr("y2",220)
-            .attr("stroke","#000")
-
-        var dragBarX = this.xAxisView
-            .selectAll(".bar")
-            .data(showX)
-            .enter().append("rect")
-            .style("fill",function(d) { return d["value"] < 0 ? "brown":"steelblue"})
-            .attr("x", function (d) {
-                return xScale_x(Math.min(0, d["value"]))+60 ;
-            })
-            .attr("y", function (d) {
-                return yScale_x(d["attr"])+22 ;
-            })
-            .attr("width", function (d) {
-                if (d["value"] == 0) {
-                    return 2;
-                } else {
-                    return Math.abs(xScale_x(d["value"]) - xScale_x(0));
-                }
-            })
-            .attr("height", 10)
-            .attr("fill-opacity", 0.8);
-    }
-}
-
-function dragBar() {
-
-}
-
 function newCoordinate() {
     var newcoor=[];
+    var init = true;
     for(var i=0;i<totalNumber;i++) {
         var dx=0;
         var dy=0;
@@ -187,18 +75,44 @@ function newCoordinate() {
             dx+=coordinates[i][j]*Tx[j]
             dy+=coordinates[i][j]*Ty[j]
         }
+        if(init) {
+            curMaxX = dx;
+            curMaxY = dy;
+            curMinX = dx;
+            curMinY = dy;
+            init = false;
+        } else {
+            if(dx < curMinX) curMinX = dx;
+            if(dx > curMaxX) curMaxX = dx;
+            if(dy < curMinY) curMinY = dy;
+            if(dy > curMaxY) curMaxY = dy;
+        }
         if(coordinates[i].length===featLength) {
             din_dropzone=coordinates[i][featLength-1];
-            newcoor[i]={"cdx":dx,"cdy":dy,"dindex":i,"din_dropzone":din_dropzone}
+            newcoor[i]={"cdx":dx,"cdy":dy,"dindex":i,"din_dropzone":din_dropzone, "color": "#A5A5CA"}
         }
         else{
-            newcoor[i]={"cdx":dx,"cdy":dy,"dindex":i}
+            newcoor[i]={"cdx":dx,"cdy":dy,"dindex":i, "color": "#A5A5CA"}
         }
     }
     return newcoor;
 }
 
 function renewScattarplot(data) {
+    if(dragged == false) {
+        dragged = true;
+    }
+    data = calculateColor(data);
+    var dupWeights = JSON.parse(JSON.stringify(colorWeight));
+    dupWeights.sort(function(a, b) {
+        var keyA = a.weight,
+            keyB = b.weight;
+        if (keyA < keyB) return 1;
+        if (keyA > keyB) return -1;
+        return 0;
+    });
+    buildTopList(dupWeights);
+
     var self=this
     this.scplotView.selectAll("g").remove();
     var dx=[];
@@ -234,16 +148,68 @@ function renewScattarplot(data) {
         .attr("cy", function (d) { return self.y(d.cdy); } )
         .attr("r", 5.0)
         .style("cursor", "resize")
-        .style("fill", function (d) { if(d.din_dropzone){
+        .style("fill", function (d) {if(d.din_dropzone){
             return "#23ee85"
-        }})
+        } else return d["color"]})
         .call(drag_point)
         .on("mouseover", function(d) {
-            console.log(d.dindex);
+            //console.log(d.dindex);
             buildTable(d.dindex);
+            buildTopList(dupWeights);
             d3.select(this).style("fill-opacity", 1);
         })
         .on("mouseout", function(d){
             d3.select(this).style("fill-opacity",0.2)
         })
+
+}
+
+function calculateColor(data) {
+    var hx = (curMaxX - curMinX) / 2;
+    var hy = (curMaxY - curMinY) / 2;
+    for(var i = 0; i < totalNumber; i++) {
+        if(data[i].cdx < curMinX+hx && data[i].cdy < curMinY+hy) {
+            colorWeight[i].weight = colorWeight[i].weight + 0;
+        }
+        else if(data[i].cdx < curMinX+hx && data[i].cdy >= curMinY+hy) {
+            colorWeight[i].weight = colorWeight[i].weight + 1;
+        }
+        else if(data[i].cdx >= curMinX+hx && data[i].cdy < curMinY+hy) {
+            colorWeight[i].weight = colorWeight[i].weight + 1;
+        }
+        else {
+            colorWeight[i].weight = colorWeight[i].weight + 2;
+        }
+    }
+    var tempWeights = []
+    for(var i = 0; i < totalNumber; i++) {
+        tempWeights.push(colorWeight[i].weight);
+    }
+    var maxw = Math.max.apply(null, tempWeights);
+    var minw = Math.min.apply(null, tempWeights);
+    var step = (maxw - minw) / 5;
+    console.log(maxw, minw, step);
+    for(var i = 0; i < totalNumber; i++) {
+        if(colorWeight[i].weight <= minw+step) {
+            colorValue.push(colorList[0]);
+            data[i]["color"] = colorList[0];
+        }
+        else if(colorWeight[i].weight <= minw+step*2) {
+            colorValue.push(colorList[1]);
+            data[i]["color"] = colorList[1];
+        }
+        else if(colorWeight[i].weight <= minw+step*3) {
+            colorValue.push(colorList[2]);
+            data[i]["color"] = colorList[2];
+        }
+        else if(colorWeight[i].weight <= minw+step*4) {
+            colorValue.push(colorList[3]);
+            data[i]["color"] = colorList[3];
+        }
+        else {
+            colorValue.push(colorList[4]);
+            data[i]["color"] = colorList[4];
+        }
+    }
+    return data;
 }

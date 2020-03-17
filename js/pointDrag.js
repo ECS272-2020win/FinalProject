@@ -23,24 +23,28 @@ function dragended(d) {
         d.in_dropzone="HighY";
         coordinates[d.dindex][featLength-1]="HighY"
         HighY.push(d);
+        updateDropzone("HighY",HighY);
     }
     else if(d.x<=-40&&d.x>=-120&&d.y>=440&&d.y<=520)
     {
         d.in_dropzone="LowY";
         coordinates[d.dindex][featLength-1]="LowY"
         LowY.push(d);
+        updateDropzone("LowY",LowY)
     }
     else if(d.x<=80&&d.x>=0&&d.y>=540&&d.y<=620)
     {
         d.in_dropzone="LowX";
         coordinates[d.dindex][featLength-1]="LowX"
         LowX.push(d);
+        updateDropzone("LowX",LowX)
     }
     else if(d.x<=800&&d.x>=720&&d.y>=540&&d.y<=620)
     {
         d.in_dropzone="HighX";
         coordinates[d.dindex][featLength-1]="HighX"
         HighX.push(d);
+        updateDropzone("HighX",HighX)
     }
     else
     {
@@ -59,8 +63,12 @@ function dragended(d) {
             .attr("cx",d.oldx)
             .attr("cy",d.oldy)
             .style("fill", "#23ee85");
-        calculateDropzone();
-        updateBarchart();
+        if((HighY.length>=1&&LowY.length>=1)||(HighX.length>=1&&LowX.length>=1)){
+            calculateDropzone();
+            updateBarchart();
+        }
     }
 }
+
+
 

@@ -11,14 +11,15 @@
     <script src="js/buildScatterplot.js"></script>
     <script src="js/load.js"></script>
     <script src="js/pointDrag.js"></script>
+    <script src="js/buildButton.js"></script>
+    <script src="js/buildDropzone.js"></script>
     <link rel="stylesheet" href="css/bootstrap.min.css">
 </head>
 
 <style type="text/css">
     circle {
-  fill: blue;
+  fill: #A5A5CA;
   stroke: black;
-  fill-opacity: 0.2;
   stroke-width: 1.2px;
   stroke-opacity: 0.5;
   cursor: move; }
@@ -26,18 +27,36 @@
 <body onload="loadData()">
     <div id="controlPanel" style="width: 80%; float: left;">
         <div id="axisControl">
+            <div>
+                <select id="dataset-select" onchange="selectDataset(value)" style="position: absolute; left: 30px; top: 515px"></select>
+            </div>
             <div id="xc">
                 <select id="x-select" onchange="updateSelction(0, value)" style="position: absolute; left: 30px; top: 595px"></select>
-                <button id="x-save" style="position: absolute; left: 205px; top: 595px">Save X</button>
-                <button id="x-clear" style="position: absolute; left: 260px; top: 595px">Clear X</button>
+                <button id="x-save" onclick="saveBtn(0)" style="position: absolute; left: 205px; top: 595px">Save X</button>
+                <button id="x-clear" onclick="clearBtn(0)" style="position: absolute; left: 260px; top: 595px">Clear X</button>
             </div>
             <div id="yc">
                 <select id="y-select" onchange="updateSelction(1, value)" style="position: absolute; left: 30px; top: 555px"></select>
-                <button id="y-save" style="position: absolute; left: 205px; top: 555px">Save Y</button>
-                <button id="y-clear" style="position: absolute; left: 260px; top: 555px">Clear Y</button>
+                <button id="y-save" onclick="saveBtn(1)" style="position: absolute; left: 205px; top: 555px">Save Y</button>
+                <button id="y-clear" onclick="clearBtn(1)"style="position: absolute; left: 260px; top: 555px">Clear Y</button>
+            </div>
+            <div id="scc">
+                <button id="sc-reset" onclick="resetScatterPlot()" style="position: absolute; left: 30px; top:635px">Reset Graph</button>
+                <button id="hist-reset" onclick="resetHistory()" style="position: absolute; left: 205px; top: 635px">Reset Graph & History</button>
+            </div>
+            <div>
+                <div style="width: 70px; height: 20px; position: absolute; left: 30px; top: 685px;" id="c-0"></div>
+                <div style="width: 70px; height: 20px; position: absolute; left: 30px; top: 705px;" id="c-1"></div>
+                <div style="width: 70px; height: 20px; position: absolute; left: 30px; top: 725px;" id="c-2"></div>
+                <div style="width: 70px; height: 20px; position: absolute; left: 30px; top: 745px;" id="c-3"></div>
+                <div style="width: 70px; height: 20px; position: absolute; left: 30px; top: 765px;" id="c-4"></div>
+
+                <div style="width: 140px; height: 20px; position: absolute; left: 130px; top: 685px;" id="t-0">Least desired</div>
+                <div style="width: 140px; height: 20px; position: absolute; left: 130px; top: 765px;" id="t-4">Most desired</div>
             </div>
         </div>
     </div>
     <div id="dataPanel" class="table" style="width: 20%; float: left;"></div>
+    <div id="top10" class="table" style="width: 20%; float: left;"></div>
 </body>
 </html>
